@@ -132,12 +132,32 @@
 
   /* ---------- CHAPTER 2 — vinyl ---------- */
   #vinyl{ background:radial-gradient(120% 100% at 50% 30%, #16130d 0%, var(--ink) 60%); }
-  #vinyl .vinyl-hit{
-    width:min(78vw, 420px); aspect-ratio:1/1; margin:2.4rem auto 0;
-    touch-action:pan-y;
-    cursor:grab;
+  .vinyl-disc-wrap{
+    width:min(70vw, 340px); aspect-ratio:1/1; margin:2.4rem auto 0;
+    touch-action:pan-y; position:relative;
   }
-  #vinyl .vinyl-hit:active{ cursor:grabbing; }
+  .vinyl-disc{
+    width:100%; height:100%; border-radius:50%; position:relative;
+    background:#050505; overflow:hidden; cursor:grab;
+    box-shadow:0 25px 60px -15px rgba(0,0,0,.8), 0 0 0 1px rgba(232,184,75,.15);
+    will-change:transform;
+  }
+  .vinyl-disc:active{ cursor:grabbing; }
+  .vinyl-disc::before{
+    content:''; position:absolute; inset:0; border-radius:50%; z-index:2;
+    background:repeating-radial-gradient(circle, rgba(255,255,255,.05) 0 1px, transparent 1.5px 5px);
+    pointer-events:none;
+  }
+  .vinyl-disc::after{
+    content:''; position:absolute; top:50%; left:50%; width:10px; height:10px;
+    background:var(--ink); border-radius:50%; transform:translate(-50%,-50%);
+    box-shadow:0 0 0 2px var(--gold); z-index:3; pointer-events:none;
+  }
+  .vinyl-disc img{
+    position:absolute; inset:15%; width:70%; height:70%; border-radius:50%;
+    object-fit:cover; pointer-events:none;
+    box-shadow:0 0 0 2px rgba(232,184,75,.55);
+  }
   #vinyl .prose{
     max-width:30rem;
     font-family:var(--serif);
@@ -294,7 +314,11 @@
 
   <section id="vinyl">
     <div class="label">Capítol 2</div>
-    <div class="vinyl-hit" id="vinyl-hit"></div>
+    <div class="vinyl-disc-wrap">
+      <div class="vinyl-disc" id="vinyl-disc">
+        <img id="vinyl-disc-img" src="assets/ttpd-cover.png" alt="">
+      </div>
+    </div>
     <p class="prose">Aquests discos han sonat en les nits bones i en les que no tant.</p>
     <p class="prose" style="margin-top:.6rem;">Avui sumen una cançó més: la del teu primer dia.</p>
     <div class="hint">◐ llisca per girar-lo ◑</div>
@@ -391,8 +415,10 @@
   });
 
   /* =========================================================
-     THREE.JS SCENE
+     THREE.JS SCENE (decorative — wrapped so a WebGL failure on
+     some device never breaks the Spotify player or vinyl disc below)
   ========================================================= */
+  try {
   var canvas = document.getElementById('scene-canvas');
   var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias:true, alpha:true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -462,33 +488,6 @@
   capGroup.rotation.x = -0.25;
   scene.add(capGroup);
 
-  /* ---------- vinyl ---------- */
-  var loader = new THREE.TextureLoader();
-  var texTTPD = loader.load('assets/ttpd-cover.png');
-  var texFolklore = loader.load('assets/folklore-cover.png');
-  [texTTPD, texFolklore].forEach(function(t){
-    t.colorSpace = THREE.SRGBColorSpace || t.colorSpace;
-    t.anisotropy = 4;
-    t.generateMipmaps = false;
-    t.minFilter = THREE.LinearFilter;
-    t.magFilter = THREE.LinearFilter;
-  });
-
-  function buildVinyl(){
-    var geo = new THREE.CylinderGeometry(1.55, 1.55, 0.05, 48, 1, false);
-    var sideMat = new THREE.MeshStandardMaterial({ color:0x050505, roughness:.35, metalness:.5 });
-    var topMat = new THREE.MeshStandardMaterial({ map: texTTPD, roughness:.4, metalness:.2 });
-    var botMat = new THREE.MeshStandardMaterial({ map: texFolklore, roughness:.4, metalness:.2 });
-    var mesh = new THREE.Mesh(geo, [sideMat, topMat, botMat]);
-    return mesh;
-  }
-  var vinylGroup = new THREE.Group();
-  var vinylMesh = buildVinyl();
-  vinylMesh.rotation.x = Math.PI / 2; // stand it up facing camera on Z
-  vinylGroup.add(vinylMesh);
-  vinylGroup.visible = false;
-  scene.add(vinylGroup);
-
   /* ---------- fireflies ---------- */
   function makeGlowTexture(){
     var c = document.createElement('canvas'); c.width = c.height = 64;
@@ -537,10 +536,8 @@
   });
   ScrollTrigger.create({
     trigger: '#vinyl', start:'top 70%', end:'bottom top',
-    onEnter: function(){ vinylGroup.visible = true; capGroup.visible = false; },
-    onEnterBack: function(){ vinylGroup.visible = true; },
-    onLeave: function(){ vinylGroup.visible = false; },
-    onLeaveBack: function(){ vinylGroup.visible = false; }
+    onEnter: function(){ capGroup.visible = false; },
+    onLeaveBack: function(){ capGroup.visible = false; }
   });
   ScrollTrigger.create({
     trigger: '#cierre', start:'top 60%', end:'bottom bottom',
@@ -551,39 +548,6 @@
   gsap.to(camera.position, {
     z: 5.6,
     scrollTrigger:{ trigger: document.body, start:'top top', end:'bottom bottom', scrub:1 }
-  });
-
-  /* ---------- vinyl drag rotation with inertia ---------- */
-  var vinylHit = document.getElementById('vinyl-hit');
-  var dragging = false, lastX = 0, vinylVel = 0.4;
-  function pointerDown(e){ dragging = true; lastX = (e.touches ? e.touches[0].clientX : e.clientX); }
-  function pointerMove(e){
-    if (!dragging) return;
-    var x = (e.touches ? e.touches[0].clientX : e.clientX);
-    var dx = x - lastX; lastX = x;
-    vinylVel += dx * 0.006;
-  }
-  function pointerUp(){ dragging = false; }
-  vinylHit.addEventListener('pointerdown', pointerDown);
-  window.addEventListener('pointermove', pointerMove);
-  window.addEventListener('pointerup', pointerUp);
-  vinylHit.addEventListener('touchstart', pointerDown, {passive:true});
-  window.addEventListener('touchmove', pointerMove, {passive:true});
-  window.addEventListener('touchend', pointerUp);
-
-  /* ---------- spotify album toggle ---------- */
-  var ALBUMS = {
-    ttpd: '1Mo4aZ8pdj6L1jx8zSwJnt',
-    folklore: '2fenSS68JI1h4Fo296JfGr'
-  };
-  var vpTabs = document.querySelectorAll('.vp-tab');
-  var vpFrame = document.getElementById('spotify-embed');
-  vpTabs.forEach(function(btn){
-    btn.addEventListener('click', function(){
-      vpTabs.forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-      vpFrame.src = 'https://open.spotify.com/embed/album/' + ALBUMS[btn.dataset.album] + '?utm_source=generator&theme=0';
-    });
   });
 
   /* ---------- cap burst on closing ---------- */
@@ -653,13 +617,6 @@
       pivot.rotation.z = Math.sin(t*1.4)*(reduced?0.04:0.14) + tilt.x*0.15;
     }
 
-    if (vinylGroup.visible){
-      vinylMesh.rotation.z += (dt * (reduced?0.15:0.35)) + vinylVel*dt;
-      vinylVel *= 0.94;
-      vinylGroup.position.x = tilt.x * 0.25;
-      vinylGroup.position.y = tilt.y * -0.15;
-    }
-
     var pos = fGeo.attributes.position.array;
     for (var i=0;i<FIREFLY_N;i++){
       var s = fSeed[i];
@@ -687,6 +644,52 @@
     camera.lookAt(0,0,0);
     renderer.render(scene, camera);
   });
+  } catch(e){ console.error('3D scene failed to start, page still works without it', e); }
+
+  /* =========================================================
+     VINYL DISC (plain CSS/DOM, no WebGL — always works)
+  ========================================================= */
+  var ALBUMS = {
+    ttpd: { id:'1Mo4aZ8pdj6L1jx8zSwJnt', cover:'assets/ttpd-cover.png' },
+    folklore: { id:'2fenSS68JI1h4Fo296JfGr', cover:'assets/folklore-cover.png' }
+  };
+  var discEl = document.getElementById('vinyl-disc');
+  var discImg = document.getElementById('vinyl-disc-img');
+  var vpTabs = document.querySelectorAll('.vp-tab');
+  var vpFrame = document.getElementById('spotify-embed');
+
+  vpTabs.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      vpTabs.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var album = ALBUMS[btn.dataset.album];
+      vpFrame.src = 'https://open.spotify.com/embed/album/' + album.id + '?utm_source=generator&theme=0';
+      discImg.src = album.cover;
+    });
+  });
+
+  var discRot = 0, discVel = 0.12, discDragging = false, discLastX = 0;
+  function discDown(e){ discDragging = true; discLastX = (e.touches ? e.touches[0].clientX : e.clientX); }
+  function discMove(e){
+    if (!discDragging) return;
+    var x = (e.touches ? e.touches[0].clientX : e.clientX);
+    discVel = (x - discLastX) * 0.6;
+    discLastX = x;
+  }
+  function discUp(){ discDragging = false; }
+  discEl.addEventListener('pointerdown', discDown);
+  window.addEventListener('pointermove', discMove);
+  window.addEventListener('pointerup', discUp);
+  discEl.addEventListener('touchstart', discDown, {passive:true});
+  window.addEventListener('touchmove', discMove, {passive:true});
+  window.addEventListener('touchend', discUp);
+
+  (function discLoop(){
+    discRot += discVel;
+    if (!discDragging){ discVel += (0.12 - discVel) * 0.02; }
+    discEl.style.transform = 'rotate(' + discRot + 'deg)';
+    requestAnimationFrame(discLoop);
+  })();
 
   /* =========================================================
      AMBIENT VINYL CRACKLE (synthesized, no audio file)
