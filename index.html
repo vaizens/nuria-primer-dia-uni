@@ -81,6 +81,11 @@
 
   /* ---------- HERO ---------- */
   #hero{ background:transparent; }
+  #hero .address{
+    font-family:var(--serif); font-style:italic;
+    font-size:clamp(1.1rem, 3.2vw, 1.4rem);
+    color:var(--gold); opacity:0; margin-bottom:.6rem;
+  }
   #hero .headline{
     font-size:clamp(2.4rem, 9vw, 4.6rem);
     line-height:1.08;
@@ -291,6 +296,7 @@
 <main>
 
   <section id="hero">
+    <div class="address line"><span>princesita,</span></div>
     <h1 class="headline">Aquí comença<br><em>el teu primer capítol.</em></h1>
     <div class="date">DILLUNS 21 · SETEMBRE · 2026</div>
     <div class="scroll-cue"><span></span>SEGUEIX BAIXANT</div>
@@ -299,10 +305,10 @@
   <section id="cardigan">
     <div class="label">Capítol 1</div>
     <div class="prose">
-      <p class="line"><span>Fa no tant eres la noia que dubtava si això se li donaria bé.</span></p>
-      <p class="line"><span>I mira't ara: a un despertador de distància de la teva primera classe de universitat.</span></p>
-      <p class="line"><span>Has arribat fins aquí a pols, carregant amb els teus dubtes i venint igual.</span></p>
-      <p class="line"><span>Això ja diu de tu més que qualsevol nota que treguis.</span></p>
+      <p class="line"><span>Princesita, sé que avui portes per dins una barreja rara de ganes i de por, i és normal, és nova la vida que comences.</span></p>
+      <p class="line"><span>Però mira't: has arribat fins aquí carregant els teus dubtes a l'esquena i sense deixar que et paressin.</span></p>
+      <p class="line"><span>Això no ho fa qualsevol. Això ho fas tu, que ets molt més forta del que et penses els dies que costen.</span></p>
+      <p class="line"><span>I avui, encara amb els nervis, hi tornes a anar igualment.</span></p>
     </div>
     <svg class="guitar-mark" viewBox="0 0 120 200" fill="none" stroke="#F5F1E8" stroke-width="1.4">
       <path d="M60 10 L58 60"/>
@@ -319,8 +325,8 @@
         <img id="vinyl-disc-img" src="assets/ttpd-cover.png" alt="">
       </div>
     </div>
-    <p class="prose">Aquests discos han sonat en les nits bones i en les que no tant.</p>
-    <p class="prose" style="margin-top:.6rem;">Avui sumen una cançó més: la del teu primer dia.</p>
+    <p class="prose">Princesita, aquests discos han sonat en els silencis més bons i en els que costaven més de portar.</p>
+    <p class="prose" style="margin-top:.6rem;">Avui hi sumem una cançó més: la del dia que vas començar a construir la teva pròpia vida.</p>
     <div class="hint">◐ llisca per girar-lo ◑</div>
 
     <div class="vinyl-player">
@@ -349,17 +355,18 @@
     </div>
     <div class="orla-caption">la primera pàgina de la teva orla</div>
     <div class="prose">
-      <p class="line"><span>Aquesta no és l'orla de la teva graduació. Aquesta vindrà, i també hi seré.</span></p>
-      <p class="line"><span>Aquesta és la d'avui: el dia que vas <strong>començar</strong>.</span></p>
-      <p class="line"><span>Estic molt orgullós de tu, Núria. Més del que sé dir sense que soni a frase feta.</span></p>
-      <p class="line"><span>Estaràs increïble.</span></p>
+      <p class="line"><span>Aquesta no és l'orla de la teva graduació. Aquesta vindrà, i t'ho prometo, hi seré.</span></p>
+      <p class="line"><span>Aquesta és la d'avui, princesita: el dia que vas triar <strong>començar</strong>, encara amb por, encara sense saber com anirà.</span></p>
+      <p class="line"><span>I necessito que ho sàpigues bé, perquè no t'ho dic prou: estic súper mega orgullós de tu. No d'una manera petita, d'una manera que no em cap dins del pit.</span></p>
+      <p class="line"><span>No és per la nota que trauràs ni per com et surti avui. És per qui ets quan ningú mira, per com t'aixeques cada vegada, per com estimes fort i sense por.</span></p>
+      <p class="line"><span>Estaràs increïble. I encara que no ho estiguessis, jo pensaria exactament el mateix de tu.</span></p>
     </div>
   </section>
 
   <section id="cierre">
     <h2 class="headline">Molta sort a la teva<br><em>classe de les 10h.</em></h2>
-    <p class="sub">Vés, aprèn, i si t'equivoques, millor. Això també és part del capítol. Aquest és només el primer.</p>
-    <p class="sign">amb tot el meu orgull, Alex</p>
+    <p class="sub">Vés, respira i confia, princesita. Si t'equivoques, no passa res, també forma part del capítol. Aquest és només el primer de molts.</p>
+    <p class="sign">amb absolutament tot el meu orgull, sempre, Alex</p>
     <p class="foot">PRIMER DIA · CAPÍTOL 1 · FI</p>
   </section>
 
@@ -387,8 +394,9 @@
     }, opts));
   }
 
-  gsap.to('#hero .headline', {opacity:1, filter:'blur(0px)', duration:1.8, ease:'power2.out', delay:.3});
-  gsap.to('#hero .date', {opacity:1, duration:1.4, delay:1.2});
+  gsap.to('#hero .address', {opacity:1, duration:1.2, ease:'power2.out'});
+  gsap.to('#hero .headline', {opacity:1, filter:'blur(0px)', duration:1.8, ease:'power2.out', delay:.5});
+  gsap.to('#hero .date', {opacity:1, duration:1.4, delay:1.4});
 
   ['#cardigan .prose .line span', '#orla .prose .line span'].forEach(function(sel){
     gsap.utils.toArray(sel).forEach(function(el, i){
